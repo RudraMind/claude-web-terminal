@@ -27,6 +27,20 @@ const SHELLS = {
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' cdn.jsdelivr.net; " +
+    "style-src 'self' cdn.jsdelivr.net; " +
+    "connect-src 'self' ws://localhost:* ws://127.0.0.1:*; " +
+    "font-src cdn.jsdelivr.net; " +
+    "img-src 'self' data:; " +
+    "frame-ancestors 'none'");
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const server = http.createServer(app);
@@ -65,7 +79,7 @@ wss.on('connection', (ws, req) => {
   const query = parseUrl(req.url, true).query;
   const shellKey = query.shell;
 
-  if (!shellKey || !SHELLS[shellKey]) {
+  if (!shellKey || !Object.prototype.hasOwnProperty.call(SHELLS, shellKey)) {
     ws.close(1008, 'Invalid shell');
     return;
   }
@@ -109,7 +123,9 @@ wss.on('connection', (ws, req) => {
     if (msg.charAt(0) === '{') {
       try {
         const parsed = JSON.parse(msg);
-        if (parsed.type === 'resize' && parsed.cols && parsed.rows) {
+        if (parsed.type === 'resize' &&
+            Number.isInteger(parsed.cols) && parsed.cols > 0 && parsed.cols <= 1000 &&
+            Number.isInteger(parsed.rows) && parsed.rows > 0 && parsed.rows <= 500) {
           ptyProcess.resize(parsed.cols, parsed.rows);
           return;
         }
