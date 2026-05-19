@@ -1,0 +1,27 @@
+{
+  "name": "claude-web-terminal",
+  "version": "1.0.0",
+  "description": "Real terminals in your browser — CMD and Claude Code via a localhost web UI with tab switching.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "terminal",
+    "claude",
+    "claude-code",
+    "web-terminal",
+    "xterm",
+    "node-pty",
+    "pty"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0",
+    "node-pty": "^1.0.0"
+  }
+}
