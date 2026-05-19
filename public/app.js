@@ -356,7 +356,6 @@ SplitManager.prototype._split = function(direction) {
   tabManager.tabs.push(secondary);
   tabManager.tabList.appendChild(secondary.tabEl);
   secondary.connect();
-  secondary.tabEl.classList.add('active');
 
   this.activate(active, secondary, direction);
   this._updateUnsplitBtn(true);
