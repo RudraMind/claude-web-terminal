@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RUDRA</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230d0d14' rx='4'/><text x='6' y='22' font-size='18' fill='%237c3aed'>%E2%97%89</text></svg>">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.18/index.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css"/>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header id="header">
+    <div id="rudra-identity" title="About RUDRA">
+      <span id="rudra-status-dot">&#9673;</span>
+      <div id="rudra-text">
+        <span id="rudra-name">RUDRA</span>
+        <a id="rudra-caption"
+           href="https://github.com/RudraMind/claude-web-terminal"
+           target="_blank">
+          powered by claude-web-terminal &#8599;
+        </a>
+      </div>
+    </div>
+    <div id="tab-list"></div>
+    <div id="header-controls">
+      <div class="dropdown-wrapper">
+        <button id="btn-new" class="header-btn" title="New terminal (Ctrl+Shift+T)">
+          + <span class="btn-arrow">&#9662;</span>
+        </button>
+        <div id="dropdown-new" class="dropdown" hidden>
+          <div class="dropdown-header">New Terminal</div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" data-shell="cmd">
+            <span class="item-icon cmd">&#9635;</span>CMD
+          </button>
+          <button class="dropdown-item" data-shell="claude">
+            <span class="item-icon claude">&#9670;</span>Claude Code
+          </button>
+        </div>
+      </div>
+      <div class="dropdown-wrapper">
+        <button id="btn-split" class="header-btn" title="Split pane (Ctrl+\)">
+          &#8863; <span class="btn-arrow">&#9662;</span>
+        </button>
+        <div id="dropdown-split" class="dropdown" hidden>
+          <div class="dropdown-header">Split View</div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="split-right"><span>&#8863;</span> Split Right</button>
+          <button class="dropdown-item" id="split-down"><span>&#8864;</span> Split Down</button>
+          <div class="dropdown-divider" id="unsplit-divider" hidden></div>
+          <button class="dropdown-item" id="unsplit" hidden><span>&#9633;</span> Unsplit</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="term-container">
+    <div id="pane-divider" class="pane-divider" hidden></div>
+  </div>
+
+  <footer id="status-bar">
+    <div id="status-left">
+      <span id="status-dot" class="status-dot connected"></span>
+      <span id="status-connection">Connected</span>
+      <span class="status-sep">&#183;</span>
+      <span id="status-shell">&#8212;</span>
+      <span class="status-sep">&#183;</span>
+      <span id="status-tabname">&#8212;</span>
+    </div>
+    <div id="status-right">
+      <span id="status-dims">&#8212;</span>
+    </div>
+  </footer>
+
+  <div id="about-panel" class="about-panel" hidden>
+    <div class="about-inner">
+      <div class="about-logo">
+        <span class="about-dot">&#9673;</span>
+        <span class="about-name">RUDRA</span>
+      </div>
+      <div class="about-version">v1.0.0</div>
+      <div class="about-tagline">Your terminal. Any browser.</div>
+      <div class="about-divider"></div>
+      <div class="about-powered">
+        powered by
+        <a href="https://github.com/RudraMind/claude-web-terminal"
+           target="_blank" class="about-link">claude-web-terminal &#8599;</a>
+      </div>
+      <div class="about-divider"></div>
+      <div class="about-shortcuts">
+        <div class="shortcut-row">
+          <span class="shortcut-key">Ctrl+Shift+T</span>
+          <span class="shortcut-label">New CMD</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-key">Ctrl+Shift+C</span>
+          <span class="shortcut-label">New Claude Code</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-key">Ctrl+Shift+W</span>
+          <span class="shortcut-label">Close tab</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-key">Ctrl+Tab</span>
+          <span class="shortcut-label">Next tab</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-key">Ctrl+\</span>
+          <span class="shortcut-label">Split right</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="about-backdrop" class="about-backdrop" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links@0.9.0/lib/xterm-addon-web-links.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
