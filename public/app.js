@@ -6,23 +6,24 @@ var RUDRA_THEME = {
   foreground:          '#e2e2f0',
   cursor:              '#a78bfa',
   cursorAccent:        '#0d0d14',
-  selectionBackground: 'rgba(124, 58, 237, 0.3)',
-  black:         '#1b1b28',
-  red:           '#f87171',
-  green:         '#34d399',
-  yellow:        '#fbbf24',
+  selectionBackground: 'rgba(124, 58, 237, 0.2)',
+  selectionForeground: '#e2e2f0',
+  black:         '#1a1a2e',
+  red:           '#ff6b6b',
+  green:         '#4ade80',
+  yellow:        '#facc15',
   blue:          '#60a5fa',
-  magenta:       '#a78bfa',
+  magenta:       '#c084fc',
   cyan:          '#22d3ee',
   white:         '#e2e2f0',
   brightBlack:   '#44445a',
   brightRed:     '#fca5a5',
-  brightGreen:   '#6ee7b7',
+  brightGreen:   '#86efac',
   brightYellow:  '#fde68a',
   brightBlue:    '#93c5fd',
-  brightMagenta: '#c4b5fd',
+  brightMagenta: '#d8b4fe',
   brightCyan:    '#67e8f9',
-  brightWhite:   '#f1f1ff',
+  brightWhite:   '#f8fafc',
 };
 
 // ── About panel ────────────────────────────────────────────────────────────
@@ -39,6 +40,10 @@ function closeAbout() {
 }
 
 document.getElementById('rudra-identity').addEventListener('click', openAbout);
+// Prevent caption link click from bubbling up to identity → About panel
+document.getElementById('rudra-caption').addEventListener('click', function(e) {
+  e.stopPropagation();
+});
 aboutBackdrop.addEventListener('click', closeAbout);
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && !aboutPanel.hidden) { closeAbout(); }
@@ -59,6 +64,7 @@ function updateStatusBar(tab) {
     statusShell.textContent      = '—';
     statusTabname.textContent    = '—';
     rudraStatusDot.className     = 'dead';
+    document.title               = 'RUDRA';
     return;
   }
   if (tab.dead) {
@@ -72,11 +78,12 @@ function updateStatusBar(tab) {
   }
   statusShell.textContent   = tab.shell === 'claude' ? 'Claude Code' : 'CMD';
   statusTabname.textContent = tab.label;
+  document.title            = tab.label + ' — RUDRA';
 }
 
 function updateTermDims(tab) {
   if (!tab || !tab.term) { statusDims.textContent = '—'; return; }
-  statusDims.textContent = tab.term.cols + 'x' + tab.term.rows;
+  statusDims.textContent = tab.term.cols + ' \xd7 ' + tab.term.rows;
 }
 
 // ── Tab label inline rename ────────────────────────────────────────────────
@@ -122,12 +129,14 @@ function Tab(shell) {
   this.term = new Terminal({
     theme:            RUDRA_THEME,
     fontFamily:       "'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace",
-    fontSize:         14,
-    lineHeight:       1.2,
+    fontSize:         13,
+    lineHeight:       1.4,
+    letterSpacing:    0,
     cursorBlink:      true,
     cursorStyle:      'block',
     scrollback:       5000,
     allowProposedApi: true,
+    convertEol:       false,
   });
 
   this.fitAddon = new FitAddon.FitAddon();
@@ -166,6 +175,7 @@ function Tab(shell) {
   var paneEl = document.createElement('div');
   paneEl.className     = 'term-pane';
   paneEl.style.display = 'none';
+  paneEl.tabIndex      = 0;
   this.containerEl     = paneEl;
 
   // Events
@@ -180,6 +190,12 @@ function Tab(shell) {
   });
   tabEl.addEventListener('click', function() {
     tabManager.activateTab(self.id);
+  });
+  paneEl.addEventListener('click', function() {
+    if (splitManager.isActive) {
+      splitManager.focusPane(self);
+      self.term.focus();
+    }
   });
 }
 
@@ -414,6 +430,8 @@ SplitManager.prototype.focusPane = function(tab) {
   if (!this.isActive) { return; }
   this.primary.containerEl.classList.toggle('focused',   this.primary   === tab);
   this.secondary.containerEl.classList.toggle('focused', this.secondary === tab);
+  updateStatusBar(tab);
+  updateTermDims(tab);
 };
 
 SplitManager.prototype._applyRatio = function() {
@@ -545,9 +563,12 @@ document.addEventListener('keydown', function(e) {
       e.preventDefault();
       if (tabManager.activeTab) { tabManager.closeTab(tabManager.activeTab.id); }
     }
-  } else if (e.ctrlKey && e.key === 'Tab') {
+  } else if (e.ctrlKey && !e.shiftKey && e.key === 'Tab') {
     e.preventDefault();
     tabManager.activateNextTab();
+  } else if (e.ctrlKey && e.shiftKey && e.key === 'Tab') {
+    e.preventDefault();
+    tabManager.activatePrevTab();
   } else if (e.ctrlKey && e.key === '\\') {
     e.preventDefault();
     if (tabManager.activeTab) { splitManager.splitRight(); }
