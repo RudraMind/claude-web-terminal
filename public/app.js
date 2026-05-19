@@ -211,6 +211,12 @@ Tab.prototype._openWS = function() {
   var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   this.ws = new WebSocket(protocol + '//' + location.host + '/pty?shell=' + this.shell);
 
+  this.term.onData(function(data) {
+    if (self.ws && self.ws.readyState === WebSocket.OPEN) {
+      self.ws.send(data);
+    }
+  });
+
   this.ws.addEventListener('open', function() {
     self.sendResize();
   });
@@ -561,13 +567,13 @@ document.addEventListener('keydown', function(e) {
     } else if (e.key === 'W') {
       e.preventDefault();
       if (tabManager.activeTab) { tabManager.closeTab(tabManager.activeTab.id); }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      tabManager.activatePrevTab();
     }
-  } else if (e.ctrlKey && !e.shiftKey && e.key === 'Tab') {
+  } else if (e.ctrlKey && e.key === 'Tab') {
     e.preventDefault();
     tabManager.activateNextTab();
-  } else if (e.ctrlKey && e.shiftKey && e.key === 'Tab') {
-    e.preventDefault();
-    tabManager.activatePrevTab();
   } else if (e.ctrlKey && e.key === '\\') {
     e.preventDefault();
     if (tabManager.activeTab) { splitManager.splitRight(); }
