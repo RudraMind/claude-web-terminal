@@ -26,13 +26,15 @@ const SHELLS = {
 
 const app = express();
 const port = process.env.PORT || 3000;
+let boundPort = null;
 
 app.use((req, res, next) => {
+  const wsPort = boundPort !== null ? boundPort : port;
   res.setHeader('Content-Security-Policy',
     "default-src 'self'; " +
     "script-src 'self' cdn.jsdelivr.net; " +
     "style-src 'self' cdn.jsdelivr.net; " +
-    "connect-src 'self' ws://localhost:* ws://127.0.0.1:*; " +
+    `connect-src 'self' ws://localhost:${wsPort} ws://127.0.0.1:${wsPort}; ` +
     "font-src cdn.jsdelivr.net; " +
     "img-src 'self' data:; " +
     "frame-ancestors 'none'");
@@ -100,7 +102,8 @@ wss.on('connection', (ws, req) => {
   if (config.initCommand) {
     setTimeout(() => {
       if (ws.readyState === ws.OPEN) {
-        ptyProcess.write(config.initCommand);
+        try { ptyProcess.write(config.initCommand); }
+        catch (e) { console.error('pty initCommand write failed:', e.message); }
       }
     }, 500);
   }
@@ -126,12 +129,14 @@ wss.on('connection', (ws, req) => {
         if (parsed.type === 'resize' &&
             Number.isInteger(parsed.cols) && parsed.cols > 0 && parsed.cols <= 1000 &&
             Number.isInteger(parsed.rows) && parsed.rows > 0 && parsed.rows <= 500) {
-          ptyProcess.resize(parsed.cols, parsed.rows);
+          try { ptyProcess.resize(parsed.cols, parsed.rows); }
+          catch (e) { console.error('pty resize failed:', e.message); }
           return;
         }
       } catch (e) { /* not JSON — fall through to write */ }
     }
-    ptyProcess.write(msg);
+    try { ptyProcess.write(msg); }
+    catch (e) { console.error('pty write failed:', e.message); }
   });
 
   ws.on('close', () => {
@@ -152,5 +157,6 @@ process.on('SIGINT', () => { killAllTerminals(); process.exit(0); });
 process.on('SIGTERM', () => { killAllTerminals(); process.exit(0); });
 
 server.listen(port, '127.0.0.1', () => {
-  console.log(`Server running at http://localhost:${port}`);
+  boundPort = server.address().port;
+  console.log(`Server running at http://localhost:${boundPort}`);
 });
